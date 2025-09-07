@@ -3,26 +3,26 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { prisma } from "./utils/db";
 import { notFound, redirect } from "next/navigation";
+import { PostFormData } from "@/lib/validations/post";
 
-// Type definition for form data
-export type CreatePostFormData = {
-  title: string;
-  content: string;
-  imageUrl: string;
-};
-
-export async function addNewPost(formData: CreatePostFormData) {
-  const { content, imageUrl, title } = formData;
-
+// Helper function for authentication check
+async function requireAuth() {
   const { getUser, isAuthenticated } = getKindeServerSession();
   const user = await getUser();
   const isLoggedIn = await isAuthenticated();
 
   if (!isLoggedIn) {
-    return redirect("/api/auth/register");
+    redirect("/api/auth/register");
   }
 
-  const data = await prisma.blogPost.create({
+  return user;
+}
+
+export async function addNewPost(formData: PostFormData) {
+  const user = await requireAuth();
+  const { content, imageUrl, title } = formData;
+
+  await prisma.blogPost.create({
     data: {
       title,
       content,
@@ -32,6 +32,8 @@ export async function addNewPost(formData: CreatePostFormData) {
       authorId: user?.id || "unknown",
     },
   });
+
+  redirect("/dashboard");
 }
 
 export async function getRecentPosts(userId: string) {
@@ -55,18 +57,11 @@ export async function getPostById(postId: string) {
   return post;
 }
 
-export async function updatePost(postId: string, formData: CreatePostFormData) {
+export async function updatePost(postId: string, formData: PostFormData) {
+  const user = await requireAuth();
   const { content, imageUrl, title } = formData;
 
-  const { getUser, isAuthenticated } = getKindeServerSession();
-  const user = await getUser();
-  const isLoggedIn = await isAuthenticated();
-
-  if (!isLoggedIn) {
-    return redirect("/api/auth/register");
-  }
-
-  const post = await prisma.blogPost.update({
+  await prisma.blogPost.update({
     where: { id: postId },
     data: {
       title,
@@ -75,17 +70,11 @@ export async function updatePost(postId: string, formData: CreatePostFormData) {
     },
   });
 
-  return redirect("/dashboard");
+  redirect("/dashboard");
 }
 
 export async function deletePost(postId: string) {
-  const { getUser, isAuthenticated } = getKindeServerSession();
-  const user = await getUser();
-  const isLoggedIn = await isAuthenticated();
-
-  if (!isLoggedIn) {
-    return redirect("/api/auth/register");
-  }
+  const user = await requireAuth();
 
   // Check if user is the author
   const post = await prisma.blogPost.findUnique({
@@ -100,5 +89,5 @@ export async function deletePost(postId: string) {
     where: { id: postId },
   });
 
-  return redirect("/dashboard");
+  redirect("/dashboard");
 }

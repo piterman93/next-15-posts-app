@@ -24,7 +24,10 @@ export default async function PostPage({ params }: PostPageProps) {
     redirect("/api/auth/register");
   }
 
-  const post = await getPostById(params.id);
+  // Await params before using
+  const { id } = await params;
+
+  const post = await getPostById(id);
 
   if (!post) {
     redirect("/dashboard");

@@ -10,6 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import {
+  LoginLink,
+  RegisterLink,
+} from "@kinde-oss/kinde-auth-nextjs/components";
+import {
   ArrowRight,
   Zap,
   Shield,
@@ -50,7 +54,7 @@ export default async function Home() {
               </Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
-              <Link href="/signup">Get Started</Link>
+              <RegisterLink>Get Started</RegisterLink>
             </Button>
           </div>
         </div>
@@ -153,13 +157,13 @@ export default async function Home() {
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="group">
-                <Link href="/signup">
+                <RegisterLink>
                   Create Account
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Link>
+                </RegisterLink>
               </Button>
               <Button variant="outline" size="lg" asChild>
-                <Link href="/login">Already have an account</Link>
+                <LoginLink>Already have an account</LoginLink>
               </Button>
             </div>
           </CardContent>

@@ -1,7 +1,7 @@
 import { getPostById } from "@/app/actions";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
-import EditPostForm from "./EditPostForm";
+import EditPostClient from "./EditPostClient";
 
 interface EditPostPageProps {
   params: {
@@ -18,7 +18,10 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
     redirect("/api/auth/register");
   }
 
-  const post = await getPostById(params.id);
+  // Await params before using
+  const { id } = await params;
+
+  const post = await getPostById(id);
 
   if (!post) {
     redirect("/dashboard");
@@ -31,5 +34,15 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
     redirect("/dashboard");
   }
 
-  return <EditPostForm post={post} />;
+  return (
+    <EditPostClient
+      postId={id}
+      backHref={`/dashboard/post/${id}`}
+      initialData={{
+        title: post.title,
+        content: post.content,
+        imageUrl: post.imageUrl,
+      }}
+    />
+  );
 }
